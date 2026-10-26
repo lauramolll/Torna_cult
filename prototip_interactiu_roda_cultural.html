@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RODA - Prototip Cultural Interactiu CUL.T</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"Playfair Display"', 'serif'],
+          },
+          colors: {
+            roda: {
+              dark: '#1C1624',
+              surface: '#261F33',
+              card: '#322942',
+              terracotta: '#E06543',
+              terracottaDark: '#C95333',
+              yellow: '#F3B43F',
+              green: '#2A7A59',
+              greenLight: '#E8F5EE',
+              purple: '#5B3B78',
+              cream: '#FAF7F2',
+              muted: '#A59BAE'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Estil personalitzat per a la simulació de mòbil */
+    body {
+      background: radial-gradient(circle at 50% 20%, #2A1D34 0%, #130D1A 100%);
+      color: #FAF7F2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Scrollbar estilitzat */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1C1624;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #5B3B78;
+      border-radius: 9999px;
+    }
+
+    .glass-nav {
+      background: rgba(28, 22, 36, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .pulse-amber {
+      animation: pulseGlow 2.5s infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(224, 101, 67, 0.4); }
+      50% { box-shadow: 0 0 25px rgba(243, 180, 63, 0.6); }
+    }
+  </style>
+</head>
+<body class="font-sans antialiased selection:bg-roda-terracotta selection:text-white">
+
+  <!-- ================= BARRA SUPERIOR DE CONTROL PER AL JURAT / PRESENTACIÓ ================= -->
+  <header class="w-full bg-black/60 border-b border-white/10 px-4 py-2.5 text-xs z-50 sticky top-0 backdrop-blur-md">
+    <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="font-semibold text-white tracking-wide">CUL.T Pilot UV</span>
+        <span class="text-white/40">|</span>
+        <span class="text-white/80">Prototip Funcional RODA Cooperativa</span>
+      </div>
+
+      <!-- Selector ràpid d'etapes per a la defensa -->
+      <nav class="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10 text-white/70">
+        <button onclick="goToScreen(1)" id="pill-1" class="px-2.5 py-1 rounded-lg transition font-medium text-white bg-roda-terracotta shadow-sm">1. Captació</button>
+        <button onclick="goToScreen(2)" id="pill-2" class="px-2.5 py-1 rounded-lg transition font-medium hover:text-white">2. Votació</button>
+        <button onclick="goToScreen(3)" id="pill-3" class="px-2.5 py-1 rounded-lg transition font-medium hover:text-white">3. Proposta</button>
+        <button onclick="goToScreen(4)" id="pill-4" class="px-2.5 py-1 rounded-lg transition font-medium hover:text-white">4. Ambaixador</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ================= CONTENIDOR PRINCIPAL (EMULADOR DE SMARTPHONE) ================= -->
+  <main class="flex-1 flex items-center justify-center p-2 sm:p-4 md:py-6">
+    <div class="w-full max-w-[430px] h-[850px] max-h-[92vh] bg-roda-dark rounded-[40px] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_0_10px_#2B2338] border border-white/15 overflow-hidden flex flex-col relative">
+
+      <!-- Dynamic Island / Speaker notch decoratiu de telèfon modern -->
+      <div class="absolute top-2.5 left-1/2 -translate-x-1/2 w-28 h-4 bg-black rounded-full z-40 pointer-events-none flex items-center justify-center">
+        <div class="w-2.5 h-2.5 rounded-full bg-[#151515] mr-2"></div>
+        <div class="w-1.5 h-1.5 rounded-full bg-blue-900/60"></div>
+      </div>
+
+      <!-- ÀREA DE CONTINGUT DINÀMIC -->
+      <div id="phone-content" class="flex-1 overflow-y-auto overflow-x-hidden relative flex flex-col">
+
+        <!-- ========================================================================= -->
+        <!-- PANTALLA 1: LA CAPTACIÓ (EL REGISTRE)                                      -->
+        <!-- ========================================================================= -->
+        <section id="screen-1" class="flex-1 flex flex-col justify-between transition-opacity duration-300">
+          <div>
+            <!-- Header RODA -->
+            <div class="pt-8 px-5 pb-3 flex items-center justify-between">
+              <div class="flex items-center gap-1.5">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-roda-terracotta to-roda-yellow flex items-center justify-center font-black text-black text-base shadow-sm">
+                  R
+                </div>
+                <span class="font-extrabold tracking-wider text-xl text-white">RÖDA</span>
+              </div>
+              <button onclick="toggleMockDrawer()" class="p-2 text-white/70 hover:text-white rounded-lg hover:bg-white/5 transition" aria-label="Menú">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+              </button>
+            </div>
+
+            <!-- Imatge d'impacte de banda musical -->
+            <div class="relative mx-4 mt-2 h-64 rounded-3xl overflow-hidden shadow-lg border border-white/10 group">
+              <img 
+                src="https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=800&q=80" 
+                alt="Banda de música valenciana al carrer" 
+                class="w-full h-full object-cover brightness-[0.75] contrast-[1.05]"
+                onerror="this.src='https://placehold.co/600x400/2A1D34/FFFFFF?text=Banda+Valenciana'"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-roda-dark via-roda-dark/40 to-transparent"></div>
+              
+              <div class="absolute bottom-4 left-4 right-4">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-roda-yellow/90 text-black mb-2 shadow-sm">
+                  <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path></svg>
+                  La música també es comparteix
+                </span>
+                <h1 class="font-serif text-3xl font-bold text-white tracking-tight leading-none drop-shadow-md">
+                  ¡Gràcies pel vostre so!
+                </h1>
+              </div>
+            </div>
+
+            <!-- Text introductori i formulari -->
+            <div class="px-5 pt-4">
+              <p class="text-sm text-roda-muted leading-relaxed">
+                Formes part d'una història que es fa col·lectivament. Deixa el teu correu i estigues al dia del documental del teu grup, i de tot el que passa a <strong class="text-white">RODA</strong>.
+              </p>
+
+              <!-- Formulari de Captació -->
+              <form id="form-captacio" onsubmit="handleRegistration(event)" class="mt-5 space-y-3.5">
+                <div class="relative">
+                  <input 
+                    type="email" 
+                    id="input-email" 
+                    required 
+                    placeholder="El teu correu electrònic" 
+                    class="w-full px-4 py-3.5 bg-roda-surface border border-white/15 rounded-2xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-roda-terracotta text-sm transition shadow-inner"
+                    value="musica.valenciana@uv.es"
+                  />
+                  <button 
+                    type="submit" 
+                    class="absolute right-1.5 top-1.5 bottom-1.5 px-5 bg-roda-yellow hover:bg-amber-400 active:scale-95 text-black font-bold text-sm rounded-xl transition flex items-center gap-1 shadow-sm">
+                    <span>Envia</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                  </button>
+                </div>
+
+                <div class="space-y-2 pt-1 text-xs text-white/80">
+                  <label class="flex items-start gap-2.5 cursor-pointer">
+                    <input type="checkbox" checked class="mt-0.5 rounded text-roda-terracotta focus:ring-0 bg-roda-surface border-white/20 w-4 h-4">
+                    <span>Vull rebre avisos sobre l'estrena del documental del meu grup</span>
+                  </label>
+                  <label class="flex items-start gap-2.5 cursor-pointer">
+                    <input type="checkbox" checked class="mt-0.5 rounded text-roda-terracotta focus:ring-0 bg-roda-surface border-white/20 w-4 h-4">
+                    <span>Vull participar i votar en la plataforma comunitària</span>
+                  </label>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Footer Ecològic (Doble Transició) -->
+          <div class="p-5">
+            <div class="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-xl bg-roda-green/30 text-emerald-400 flex items-center justify-center">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                </div>
+                <div>
+                  <p class="text-xs font-semibold text-white">Servidors verds i sobirania tecnològica</p>
+                  <p class="text-[11px] text-white/50">Cultura valenciana alimentada amb energia renovable</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- PANTALLA 2: EL VISIONAT I VOTACIÓ (PING-PONG)                             -->
+        <!-- ========================================================================= -->
+        <section id="screen-2" class="flex-1 flex-col justify-between hidden transition-opacity duration-300">
+          <div>
+            <!-- Header amb compte de soci -->
+            <div class="pt-8 px-5 pb-3 flex items-center justify-between border-b border-white/10">
+              <div class="flex items-center gap-2">
+                <button onclick="goToScreen(1)" class="p-1.5 -ml-1.5 text-white/60 hover:text-white" title="Arrere">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <span class="font-extrabold tracking-wider text-lg text-white">RÖDA</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="user-pill" class="text-xs px-2.5 py-1 rounded-full bg-roda-terracotta/20 border border-roda-terracotta/40 text-roda-yellow font-medium">Soci Col·laborador</span>
+                <div class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-xs font-bold text-white border border-white/20">
+                  MC
+                </div>
+              </div>
+            </div>
+
+            <!-- Teaser Video Player Simulat -->
+            <div class="px-4 pt-4">
+              <div class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden border border-white/15 shadow-md">
+                <img 
+                  id="video-poster"
+                  src="https://images.unsplash.com/photo-1520523839898-507122133a43?auto=format&fit=crop&w=800&q=80" 
+                  alt="Dones a la banda" 
+                  class="w-full h-full object-cover opacity-75"
+                  onerror="this.src='https://placehold.co/600x340/2A1D34/FFFFFF?text=Teaser+RODA'"
+                />
+                
+                <!-- Indicadors de reproductor -->
+                <div class="absolute top-3 left-3 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-md text-[11px] font-medium text-white flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                  TEASER EN PROGRÉS
+                </div>
+                <div class="absolute top-3 right-3 bg-black/60 px-2 py-0.5 rounded text-[11px] text-white font-mono">
+                  2:15
+                </div>
+
+                <!-- Botó Play central interactiu -->
+                <button 
+                  onclick="togglePlaySimulation()" 
+                  id="btn-play-sim"
+                  class="absolute inset-0 m-auto w-14 h-14 rounded-full bg-roda-terracotta/90 hover:bg-roda-terracotta text-white flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition backdrop-blur-sm">
+                  <svg id="icon-play" class="w-7 h-7 ml-0.5" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"></path></svg>
+                </button>
+
+                <!-- Barra de progrés del vídeo -->
+                <div class="absolute bottom-0 inset-x-0 h-1.5 bg-white/20">
+                  <div id="video-progress" class="w-[65%] h-full bg-gradient-to-r from-roda-yellow to-roda-terracotta"></div>
+                </div>
+              </div>
+
+              <!-- Títol del teaser -->
+              <div class="mt-3">
+                <h2 class="font-bold text-base text-white">La força de les dones en la música de banda</h2>
+                <p class="text-xs text-roda-muted mt-0.5">Un tast del que serà el pròxim documental participatiu de RODA.</p>
+              </div>
+            </div>
+
+            <!-- SECCIÓ DE VOTACIÓ INTERACTIVA (PING-PONG) -->
+            <div class="px-4 pt-5 pb-3">
+              <div class="p-4 rounded-3xl bg-roda-surface/90 border border-white/10 shadow-lg">
+                <div class="flex items-center gap-2 mb-3">
+                  <div class="w-7 h-7 rounded-lg bg-roda-yellow/20 text-roda-yellow flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path></svg>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-bold text-white leading-tight">Qui hauria de ser la pròxima banda o txaranga?</h3>
+                    <p class="text-[11px] text-white/50">Mecànica ping-pong: la comunitat passa el testimoni</p>
+                  </div>
+                </div>
+
+                <!-- Llista d'opcions de votació -->
+                <div class="space-y-2.5" id="voting-options">
+                  <!-- Opció 1 -->
+                  <label onclick="selectBandOption('Banda de la Unió Musical de Xàbia')" class="flex items-center justify-between p-3 rounded-2xl bg-roda-card/80 border border-white/5 hover:border-roda-terracotta/60 cursor-pointer transition">
+                    <div class="flex items-center gap-3">
+                      <input type="radio" name="banda_voto" value="Xàbia" class="w-4 h-4 text-roda-terracotta focus:ring-0">
+                      <div>
+                        <p class="text-xs font-semibold text-white">Banda de la Unió Musical de Xàbia</p>
+                        <p class="text-[10px] text-white/40">Marina Alta • 62 músics</p>
+                      </div>
+                    </div>
+                    <span class="text-xs font-bold text-roda-yellow">64%</span>
+                  </label>
+
+                  <!-- Opció 2 (Seleccionada per defecte) -->
+                  <label onclick="selectBandOption('Txaranga La Colla de l\'Alcúdia')" class="flex items-center justify-between p-3 rounded-2xl bg-roda-card/80 border-2 border-roda-terracotta cursor-pointer transition shadow-md">
+                    <div class="flex items-center gap-3">
+                      <input type="radio" name="banda_voto" value="L'Alcúdia" checked class="w-4 h-4 text-roda-terracotta focus:ring-0">
+                      <div>
+                        <p class="text-xs font-bold text-white">Txaranga La Colla de l'Alcúdia</p>
+                        <p class="text-[10px] text-white/60">Ribera Alta • Música festiva de carrer</p>
+                      </div>
+                    </div>
+                    <span class="text-xs font-bold text-roda-yellow">22%</span>
+                  </label>
+
+                  <!-- Opció 3 -->
+                  <label onclick="selectBandOption('Banda Juvenil de Benimaclet')" class="flex items-center justify-between p-3 rounded-2xl bg-roda-card/80 border border-white/5 hover:border-roda-terracotta/60 cursor-pointer transition">
+                    <div class="flex items-center gap-3">
+                      <input type="radio" name="banda_voto" value="Benimaclet" class="w-4 h-4 text-roda-terracotta focus:ring-0">
+                      <div>
+                        <p class="text-xs font-semibold text-white">Banda Juvenil de Benimaclet</p>
+                        <p class="text-[10px] text-white/40">València ciutat • Joves intèrprets</p>
+                      </div>
+                    </div>
+                    <span class="text-xs font-bold text-roda-yellow">14%</span>
+                  </label>
+                </div>
+
+                <!-- Botó d'acció -->
+                <button 
+                  onclick="confirmVoteAndContinue()"
+                  class="w-full mt-4 py-3 bg-gradient-to-r from-roda-terracotta to-roda-terracottaDark hover:brightness-110 active:scale-98 text-white font-bold text-sm rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                  <span>Votar i seguir veient</span>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Micro indicador ecològic -->
+          <div class="px-5 pb-4 text-center">
+            <span class="inline-flex items-center gap-1.5 text-[11px] text-emerald-400/90 font-medium bg-emerald-950/40 px-3 py-1 rounded-full border border-emerald-500/20">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              Streaming amb 0g d'emissions de carboni (Servidors solars UV)
+            </span>
+          </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- PANTALLA 3: LA PROPOSTA COMUNITÀRIA                                        -->
+        <!-- ========================================================================= -->
+        <section id="screen-3" class="flex-1 flex flex-col justify-between hidden transition-opacity duration-300">
+          <div>
+            <!-- Header RODA -->
+            <div class="pt-8 px-5 pb-3 flex items-center justify-between border-b border-white/10">
+              <div class="flex items-center gap-2">
+                <button onclick="goToScreen(2)" class="p-1.5 -ml-1.5 text-white/60 hover:text-white" title="Arrere">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <span class="font-extrabold tracking-wider text-lg text-white">RÖDA</span>
+              </div>
+              <div class="text-xs text-roda-yellow font-semibold flex items-center gap-1">
+                <span>Comunitat Oberta</span>
+              </div>
+            </div>
+
+            <!-- Banner inspirador -->
+            <div class="p-5 bg-gradient-to-br from-roda-surface to-roda-card border-b border-white/10">
+              <h2 class="font-serif text-xl font-bold text-white leading-tight">
+                Quina història t'agradaria que siga el pròxim documental?
+              </h2>
+              <p class="text-xs text-roda-muted mt-1">
+                Les propostes amb més suport veïnal seran produïdes directament per Barret Coop.
+              </p>
+
+              <!-- Pestanyes Proposa / Vota -->
+              <div class="flex gap-2 mt-4 bg-black/40 p-1 rounded-xl border border-white/10">
+                <button id="tab-proposa" onclick="switchTab('proposa')" class="flex-1 py-1.5 text-xs font-bold rounded-lg bg-roda-terracotta text-white transition shadow-sm">
+                  Proposa
+                </button>
+                <button id="tab-vota" onclick="switchTab('vota')" class="flex-1 py-1.5 text-xs font-medium rounded-lg text-white/60 hover:text-white transition">
+                  Vota en curs
+                </button>
+              </div>
+            </div>
+
+            <!-- Àrea de contingut de pestanyes -->
+            <div class="px-5 py-4">
+              <!-- CONTINGUT PESTANYA PROPOSA -->
+              <div id="content-proposa" class="space-y-4">
+                <div class="p-4 rounded-3xl bg-roda-surface border border-white/10">
+                  <div class="flex items-center gap-2 mb-2 text-roda-yellow">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    <span class="text-xs font-bold uppercase tracking-wider">Tens una idea o tradició?</span>
+                  </div>
+                  <textarea 
+                    id="input-proposta"
+                    rows="3" 
+                    placeholder="Escriu la teua proposta... (ex: Les dones pioneres de la percussió en l'Horta Nord)" 
+                    class="w-full p-3 bg-roda-dark/80 border border-white/10 rounded-2xl text-xs text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-roda-terracotta resize-none"></textarea>
+                  
+                  <!-- Botó innovador d'àudio (Patrimoni Sonor) -->
+                  <div class="flex items-center justify-between mt-3 pt-2 border-t border-white/10">
+                    <button 
+                      type="button" 
+                      onclick="simulateVoiceRecord()" 
+                      id="btn-voice"
+                      class="flex items-center gap-1.5 text-xs text-white/70 hover:text-white bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-xl border border-white/10 transition">
+                      <svg class="w-4 h-4 text-rose-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"></path></svg>
+                      <span id="txt-voice">Grava àudio (15s)</span>
+                    </button>
+                    
+                    <button 
+                      onclick="submitProposal()" 
+                      class="px-4 py-2 bg-roda-yellow hover:bg-amber-400 text-black font-bold text-xs rounded-xl transition active:scale-95 shadow">
+                      Envia a la comunitat
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- LLISTA DE PROPOSTES EN CURS -->
+              <div class="mt-4">
+                <div class="flex items-center justify-between mb-2.5">
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-white/70">Propostes més votades</h3>
+                  <span class="text-[11px] text-roda-terracotta font-semibold">Veure totes (18)</span>
+                </div>
+
+                <div class="space-y-2.5" id="proposals-list">
+                  <!-- Proposta 1 -->
+                  <div class="p-3 rounded-2xl bg-roda-surface/80 border border-white/10 flex items-center justify-between gap-3">
+                    <div class="flex-1">
+                      <h4 class="text-xs font-bold text-white">Les dones pioneres de la percussió en l'Horta Nord</h4>
+                      <p class="text-[11px] text-white/50 mt-0.5"><span class="text-roda-yellow font-semibold">256 vots</span> • Proposta per Marta V.</p>
+                    </div>
+                    <button onclick="voteDirectProposal('Les dones pioneres de la percussió en l\'Horta Nord')" class="px-3.5 py-1.5 bg-white/10 hover:bg-roda-terracotta hover:text-white text-xs font-semibold rounded-xl text-white/90 border border-white/10 transition active:scale-95">
+                      Votar
+                    </button>
+                  </div>
+
+                  <!-- Proposta 2 -->
+                  <div class="p-3 rounded-2xl bg-roda-surface/80 border border-white/10 flex items-center justify-between gap-3">
+                    <div class="flex-1">
+                      <h4 class="text-xs font-bold text-white">La música en les festes de la Marina Alta</h4>
+                      <p class="text-[11px] text-white/50 mt-0.5"><span class="text-roda-yellow font-semibold">182 vots</span> • Proposta per Vicent S.</p>
+                    </div>
+                    <button onclick="voteDirectProposal('La música en les festes de la Marina Alta')" class="px-3.5 py-1.5 bg-white/10 hover:bg-roda-terracotta hover:text-white text-xs font-semibold rounded-xl text-white/90 border border-white/10 transition active:scale-95">
+                      Votar
+                    </button>
+                  </div>
+
+                  <!-- Proposta 3 -->
+                  <div class="p-3 rounded-2xl bg-roda-surface/80 border border-white/10 flex items-center justify-between gap-3">
+                    <div class="flex-1">
+                      <h4 class="text-xs font-bold text-white">La nova generació de dolçainers i tabaleters</h4>
+                      <p class="text-[11px] text-white/50 mt-0.5"><span class="text-roda-yellow font-semibold">134 vots</span> • Proposta per Colla El Botet</p>
+                    </div>
+                    <button onclick="voteDirectProposal('La nova generació de dolçainers i tabaleters')" class="px-3.5 py-1.5 bg-white/10 hover:bg-roda-terracotta hover:text-white text-xs font-semibold rounded-xl text-white/90 border border-white/10 transition active:scale-95">
+                      Votar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botó inferior per avançar ràpid si es desitja -->
+          <div class="p-5 pt-0">
+            <button onclick="goToScreen(4)" class="w-full py-2.5 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white text-xs font-medium rounded-xl border border-white/10 transition">
+              Veure la fitxa d'Ambaixador Cultural &rarr;
+            </button>
+          </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- PANTALLA 4: LA FITXA DEL SOCI PADRÍ / AMBAIXADOR CULTURAL                 -->
+        <!-- ========================================================================= -->
+        <section id="screen-4" class="flex-1 flex flex-col justify-between hidden transition-opacity duration-300 bg-gradient-to-b from-roda-dark via-roda-surface to-roda-dark">
+          <div>
+            <!-- Header net -->
+            <div class="pt-8 px-5 pb-2 flex items-center justify-between">
+              <span class="font-extrabold tracking-wider text-lg text-white">RÖDA</span>
+              <button onclick="goToScreen(1)" class="p-1.5 text-white/60 hover:text-white" title="Reiniciar demostració">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+
+            <!-- TARGETA DE CERTIFICAT / AMBAIXADOR -->
+            <div class="px-5 pt-2">
+              <div class="p-5 rounded-3xl bg-gradient-to-b from-roda-card to-roda-surface border-2 border-roda-yellow/40 shadow-2xl relative overflow-hidden pulse-amber">
+                
+                <!-- Segell decoratiu -->
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-roda-yellow/10 rounded-full blur-xl pointer-events-none"></div>
+                
+                <div class="text-center">
+                  <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-400/30 mb-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                  </div>
+                  
+                  <span class="block text-xs font-bold uppercase tracking-widest text-roda-yellow">Reconeixement Comunitari</span>
+                  <h3 class="font-serif text-2xl font-bold text-white mt-0.5">Soci Padrí</h3>
+                  <p class="text-xs text-white/70">DE LA CULTURA VALENCIANA</p>
+                </div>
+
+                <!-- Imatge representativa de la banda -->
+                <div class="my-3.5 h-32 rounded-2xl overflow-hidden border border-white/10 relative shadow-inner">
+                  <img 
+                    src="https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=600&q=80" 
+                    alt="Txaranga celebració" 
+                    class="w-full h-full object-cover"
+                    onerror="this.src='https://placehold.co/600x300/2A1D34/FFFFFF?text=Txaranga+Colla'"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-2.5">
+                    <span class="text-xs font-bold text-white">Vot registrat: <span id="voted-band-name" class="text-roda-yellow">Txaranga La Colla de l'Alcúdia</span></span>
+                  </div>
+                </div>
+
+                <div class="text-center px-1">
+                  <h4 class="text-sm font-bold text-white">¡Gràcies per la teua participació!</h4>
+                  <p class="text-xs text-roda-muted mt-1 leading-relaxed">
+                    Has ajudat a fer rodar la història. Ajuda'ns a fer que aquest siga el pròxim documental finançat i produït per Barret!
+                  </p>
+                </div>
+
+                <!-- Tres mètriques de compromís -->
+                <div class="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-white/10 text-center">
+                  <div class="p-2 rounded-xl bg-white/5">
+                    <p class="text-base font-bold text-roda-yellow">1</p>
+                    <p class="text-[10px] text-white/60">Vot sumat</p>
+                  </div>
+                  <div class="p-2 rounded-xl bg-white/5">
+                    <p class="text-base font-bold text-emerald-400">0g</p>
+                    <p class="text-[10px] text-white/60">CO₂ (Solar)</p>
+                  </div>
+                  <div class="p-2 rounded-xl bg-white/5">
+                    <p class="text-base font-bold text-purple-300">100%</p>
+                    <p class="text-[10px] text-white/60">Cooperatiu</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botons de compartir (Boca a orella a cost zero) -->
+            <div class="px-5 pt-4 space-y-2.5">
+              <button 
+                onclick="shareOnWhatsApp()" 
+                class="w-full py-3 bg-[#25D366] hover:bg-[#20bd5a] active:scale-98 text-white font-bold text-sm rounded-2xl transition shadow-lg flex items-center justify-center gap-2">
+                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.96.524 1.777.781 2.8.781 3.181 0 5.767-2.587 5.768-5.766.001-3.18-2.584-5.768-5.772-5.768zm7.42 5.767c-.001 4.092-3.328 7.42-7.42 7.42-1.258 0-2.441-.318-3.484-.874l-4.547 1.192 1.214-4.432c-.66-1.11-1.01-2.39-1.01-3.308 0-4.092 3.328-7.42 7.42-7.42 4.092 0 7.427 3.328 7.427 7.422z"/></svg>
+                <span>Comparteix en WhatsApp</span>
+              </button>
+
+              <button 
+                onclick="copyShareLink()" 
+                id="btn-copy-link"
+                class="w-full py-2.5 bg-white/10 hover:bg-white/15 text-white font-medium text-xs rounded-2xl border border-white/10 transition flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                <span id="copy-text">Copia l'enllaç de la campanya</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Peu per reiniciar -->
+          <div class="p-5 text-center">
+            <button onclick="goToScreen(1)" class="text-xs text-white/50 hover:text-white underline transition">
+              Tornar a l'inici del prototip (Pantalla 1)
+            </button>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Barra de navegació inferior de telèfon mòbil -->
+      <footer class="h-14 bg-roda-dark/95 border-t border-white/10 px-8 flex items-center justify-around z-30">
+        <button onclick="goToScreen(1)" class="flex flex-col items-center text-white/50 hover:text-roda-yellow focus:text-roda-yellow transition" title="Inici">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+          <span class="text-[9px] mt-0.5 font-medium">Inici</span>
+        </button>
+        <button onclick="goToScreen(2)" class="flex flex-col items-center text-white/50 hover:text-roda-yellow focus:text-roda-yellow transition" title="Documental">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span class="text-[9px] mt-0.5 font-medium">Docu</span>
+        </button>
+        <button onclick="goToScreen(3)" class="flex flex-col items-center text-white/50 hover:text-roda-yellow focus:text-roda-yellow transition" title="Comunitat">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+          <span class="text-[9px] mt-0.5 font-medium">Vots</span>
+        </button>
+        <button onclick="goToScreen(4)" class="flex flex-col items-center text-white/50 hover:text-roda-yellow focus:text-roda-yellow transition" title="Ambaixador">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+          <span class="text-[9px] mt-0.5 font-medium">Carnet</span>
+        </button>
+      </footer>
+
+      <!-- Home bar indicator de mòbil -->
+      <div class="w-32 h-1 bg-white/20 rounded-full mx-auto my-1.5 pointer-events-none"></div>
+
+      <!-- Toast Flotant de Notificació (Reemplaçament d'alert()) -->
+      <div id="toast" class="absolute bottom-16 inset-x-4 bg-roda-terracotta text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center justify-between text-xs font-semibold transform translate-y-24 opacity-0 transition-all duration-300 z-50 pointer-events-none">
+        <span id="toast-message">Missatge</span>
+        <span class="text-white/60 text-[10px]">RODA</span>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ================= LÒGICA JAVASCRIPT DE NAVEGACIÓ I PROTOTIPATGE ================= -->
+  <script>
+    // Estat global de la sessió de prova
+    let currentScreen = 1;
+    let selectedBand = "Txaranga La Colla de l'Alcúdia";
+    let isPlaying = false;
+    let isRecordingVoice = false;
+
+    // Funció per canviar de pantalla
+    function goToScreen(screenNumber) {
+      currentScreen = screenNumber;
+
+      // Ocultar totes les pantalles
+      for (let i = 1; i <= 4; i++) {
+        const screenEl = document.getElementById(`screen-${i}`);
+        const pillEl = document.getElementById(`pill-${i}`);
+        
+        if (screenEl) {
+          screenEl.classList.add('hidden');
+          screenEl.classList.remove('flex');
+        }
+        
+        if (pillEl) {
+          pillEl.classList.remove('bg-roda-terracotta', 'text-white', 'shadow-sm');
+          pillEl.classList.add('text-white/70');
+        }
+      }
+
+      // Mostrar la pantalla seleccionada
+      const activeScreen = document.getElementById(`screen-${screenNumber}`);
+      const activePill = document.getElementById(`pill-${screenNumber}`);
+      
+      if (activeScreen) {
+        activeScreen.classList.remove('hidden');
+        activeScreen.classList.add('flex');
+      }
+      
+      if (activePill) {
+        activePill.classList.add('bg-roda-terracotta', 'text-white', 'shadow-sm');
+        activePill.classList.remove('text-white/70');
+      }
+
+      // Scroll suau a dalt
+      document.getElementById('phone-content').scrollTop = 0;
+    }
+
+    // Formulari Pantalla 1: Captació per correu
+    function handleRegistration(e) {
+      e.preventDefault();
+      const email = document.getElementById('input-email').value;
+      showToast(`¡Gràcies! Correu registrat per a avisos d'estrena.`);
+      
+      setTimeout(() => {
+        goToScreen(2);
+      }, 700);
+    }
+
+    // Selecció de banda en Pantalla 2 (Ping-Pong)
+    function selectBandOption(name) {
+      selectedBand = name;
+      document.getElementById('voted-band-name').innerText = name;
+    }
+
+    // Votació confirmada en Pantalla 2
+    function confirmVoteAndContinue() {
+      showToast(`Has votat per: ${selectedBand}!`);
+      setTimeout(() => {
+        goToScreen(3);
+      }, 600);
+    }
+
+    // Simulació de reproducció de vídeo
+    function togglePlaySimulation() {
+      const btn = document.getElementById('btn-play-sim');
+      const progress = document.getElementById('video-progress');
+      isPlaying = !isPlaying;
+
+      if (isPlaying) {
+        btn.innerHTML = `<svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>`;
+        progress.style.transition = 'width 10s linear';
+        progress.style.width = '100%';
+        showToast("Reproduint teaser amb testimonis reals...");
+      } else {
+        btn.innerHTML = `<svg class="w-7 h-7 ml-0.5" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"></path></svg>`;
+      }
+    }
+
+    // Pestañes Pantalla 3
+    function switchTab(tab) {
+      const btnProposa = document.getElementById('tab-proposa');
+      const btnVota = document.getElementById('tab-vota');
+      const content = document.getElementById('content-proposa');
+
+      if (tab === 'proposa') {
+        btnProposa.classList.add('bg-roda-terracotta', 'text-white');
+        btnProposa.classList.remove('text-white/60');
+        btnVota.classList.remove('bg-roda-terracotta', 'text-white');
+        btnVota.classList.add('text-white/60');
+        content.classList.remove('opacity-50');
+      } else {
+        btnVota.classList.add('bg-roda-terracotta', 'text-white');
+        btnVota.classList.remove('text-white/60');
+        btnProposa.classList.remove('bg-roda-terracotta', 'text-white');
+        btnProposa.classList.add('text-white/60');
+        showToast("Explora les propostes veïnals en curs");
+      }
+    }
+
+    // Simulació de gravació d'àudio (Patrimoni Immaterial sonor)
+    function simulateVoiceRecord() {
+      const btn = document.getElementById('btn-voice');
+      const txt = document.getElementById('txt-voice');
+      isRecordingVoice = !isRecordingVoice;
+
+      if (isRecordingVoice) {
+        btn.classList.add('bg-rose-900/60', 'border-rose-500', 'animate-pulse');
+        txt.innerText = "Gravant àudio... (10s)";
+        showToast("Enregistrant testimoni de la teua banda...");
+      } else {
+        btn.classList.remove('bg-rose-900/60', 'border-rose-500', 'animate-pulse');
+        txt.innerText = "Àudio afegit (15s)";
+        showToast("Càpsula sonora afegida a la proposta!");
+      }
+    }
+
+    // Afegir proposta a la llista
+    function submitProposal() {
+      const input = document.getElementById('input-proposta');
+      const text = input.value.trim();
+      
+      if (!text) {
+        showToast("Escriu una breu frase o idea abans d'enviar.");
+        return;
+      }
+
+      // Crear element nou a la llista dinàmicament
+      const list = document.getElementById('proposals-list');
+      const newCard = document.createElement('div');
+      newCard.className = "p-3 rounded-2xl bg-roda-terracotta/20 border border-roda-terracotta/50 flex items-center justify-between gap-3 animate-fade-in";
+      newCard.innerHTML = `
+        <div class="flex-1">
+          <h4 class="text-xs font-bold text-white">${text}</h4>
+          <p class="text-[11px] text-white/50 mt-0.5"><span class="text-roda-yellow font-semibold">1 vot (el teu)</span> • Proposta recent</p>
+        </div>
+        <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded-lg font-bold">En revisió</span>
+      `;
+      list.prepend(newCard);
+
+      input.value = "";
+      showToast("¡Proposta rebuda i compartida amb la comunitat!");
+
+      setTimeout(() => {
+        goToScreen(4);
+      }, 900);
+    }
+
+    // Votar proposta existent
+    function voteDirectProposal(title) {
+      document.getElementById('voted-band-name').innerText = title;
+      showToast(`Has donat suport a: ${title}`);
+      setTimeout(() => {
+        goToScreen(4);
+      }, 500);
+    }
+
+    // Compartir a WhatsApp (Simulació real de difusió CUL.T)
+    function shareOnWhatsApp() {
+      const band = document.getElementById('voted-band-name').innerText;
+      const text = encodeURIComponent(`🎺 He votat per "${band}" al documental participatiu de RODA Cooperativa! Entra tu també, proposa la teua història i fem rodar la nostra música: https://roda.coop`);
+      window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+      showToast("Obrint WhatsApp per compartir amb la teua banda...");
+    }
+
+    // Copiar enllaç
+    function copyShareLink() {
+      const dummyUrl = "https://roda.coop/estrena-musica";
+      
+      // Mètode compatible per a iframes
+      const tempInput = document.createElement("input");
+      tempInput.value = dummyUrl;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+
+      const copyText = document.getElementById('copy-text');
+      copyText.innerText = "¡Enllaç copiat al porta-retalls!";
+      showToast("Enllaç copiat per compartir");
+      setTimeout(() => {
+        copyText.innerText = "Copia l'enllaç de la campanya";
+      }, 2500);
+    }
+
+    // Toast flotant per no usar mai alert()
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-message');
+      toastMsg.innerText = msg;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 2200);
+    }
+
+    function toggleMockDrawer() {
+      showToast("Menú RODA: Catàleg, Les nostres creadores, Servidors Verds");
+    }
+
+    // Assegurar inicialització
+    window.onload = function() {
+      goToScreen(1);
+    };
+  </script>
+</body>
+</html>

@@ -1,2 +1,2 @@
 # Torna_cult
-Prototipo interactivo RODA
+Interactive prototype of RODA
